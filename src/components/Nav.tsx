@@ -1,28 +1,61 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Nav() {
+  const pathname = usePathname() ?? "";
+  const showCenterLogo = pathname !== "/";
+  /** SS26 shop uses its own dedicated header (`SS26Nav`) per Figma; bail out so we don't render two. */
+  if (pathname.startsWith("/shop/ss26")) {
+    return null;
+  }
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full mix-blend-difference">
       <nav
-        className="flex items-center justify-between px-8 py-5"
+        className="relative flex items-center justify-center gap-10 py-[36px]"
         aria-label="Primary"
       >
-        <Link href="/" className="block transition-opacity hover:opacity-70">
+        {showCenterLogo && (
+          <Link
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 block transition-opacity hover:opacity-70"
+            style={{ isolation: "isolate" }}
+            aria-label="Home"
+          >
+            <Image
+              src="/agbalumo-logo.png"
+              alt=""
+              width={1081}
+              height={1080}
+              priority
+              className="h-[60px] w-[60px] shrink-0 object-contain"
+            />
+          </Link>
+        )}
+
+        <Link
+          href="/"
+          className="block transition-opacity hover:opacity-70"
+          style={{ isolation: "isolate" }}
+        >
           <Image
             src="/agbalumo-wordmark.png"
             alt="Nipase"
             width={271}
             height={90}
             priority
-            className="h-[34px] w-auto max-w-[min(126px,32vw)] shrink-0 object-contain"
+            className="h-[36.885px] w-auto max-w-[82px] shrink-0 object-contain"
           />
         </Link>
-        <ul className="flex items-center gap-10">
+
+        <ul className="flex items-center gap-[29px]">
           <li>
             <Link
               href="/about"
-              className="text-[12pt] font-medium uppercase tracking-widest text-[#1a1a1a] no-underline transition-opacity hover:opacity-50"
+              className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-white no-underline transition-opacity hover:opacity-50"
             >
               ABOUT
             </Link>
@@ -30,7 +63,7 @@ export function Nav() {
           <li>
             <Link
               href="/cart"
-              className="text-[12pt] font-medium uppercase tracking-widest text-[#1a1a1a] no-underline transition-opacity hover:opacity-50"
+              className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-white no-underline transition-opacity hover:opacity-50"
             >
               CART
             </Link>

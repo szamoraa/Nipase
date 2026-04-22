@@ -1,6 +1,6 @@
 export default function AboutPage() {
   return (
-    <main className="flex-1 bg-white px-8 py-16">
+    <main className="flex-1 bg-white px-8 py-16 pt-[calc(var(--nav-h)+4rem)]">
       <p className="text-sm text-[#1a1a1a]">About</p>
     </main>
   );

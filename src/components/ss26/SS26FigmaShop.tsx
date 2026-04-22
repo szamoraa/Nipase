@@ -1,51 +1,31 @@
-import Image from "next/image";
 import Link from "next/link";
 
-import {
-  SS26_FEATURED_SHOP,
-  formatSS26PriceCAD,
-} from "@/data/ss26-shop-featured";
-
-function FeaturedImage({
+function CroppedImage({
   src,
   alt,
   aspectClass,
   crop,
+  wrapClass = "relative min-w-0 flex-1 overflow-hidden",
 }: {
   src: string;
   alt: string;
   aspectClass: string;
-  crop: {
-    widthPct: number;
-    heightPct: number;
-    leftPct: number;
-    topPct: number;
-  };
+  crop: { w: string; h: string; left: string; top: string };
+  /** Override the wrapper class — defaults to `flex-1` for portrait pair; pass `w-full` for wide landscape. */
+  wrapClass?: string;
 }) {
   return (
-    <div
-      className={`relative min-h-0 w-full overflow-hidden bg-neutral-100 sm:min-w-0 sm:flex-1 sm:basis-0 ${aspectClass}`}
-    >
-      {/*
-        `fill` keeps the img inside the aspect-ratio box. Absolute positioning without `fill`
-        removed the image from flex sizing and could collapse the frame to 0px height.
-        `unoptimized` avoids Sharp failures on very large local JPEGs in dev / constrained envs.
-      */}
-      <Image
+    <div className={`${wrapClass} overflow-hidden ${aspectClass}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={alt}
-        fill
-        unoptimized
-        sizes="(max-width: 1024px) 100vw, (max-width: 1536px) 45vw, 600px"
-        className="max-w-none object-cover"
+        className="pointer-events-none absolute max-w-none"
         style={{
-          width: `${crop.widthPct}%`,
-          height: `${crop.heightPct}%`,
-          maxWidth: "none",
-          left: `${crop.leftPct}%`,
-          top: `${crop.topPct}%`,
-          right: "auto",
-          bottom: "auto",
+          width: crop.w,
+          height: crop.h,
+          left: crop.left,
+          top: crop.top,
         }}
       />
     </div>
@@ -53,89 +33,101 @@ function FeaturedImage({
 }
 
 export function SS26FigmaShop() {
-  const f = SS26_FEATURED_SHOP;
-
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1920px] overflow-x-clip px-[68px] pb-20 pt-32 sm:pb-24 md:pb-28 lg:pb-32">
-      {/*
-        Figma: 128px below nav (pt-32), main row gap-[60px] — two images side-by-side,
-        then a right column (335px story + 225px controls) with gap-[41px].
-      */}
-      <div className="flex w-full min-w-0 flex-col gap-12 lg:flex-row lg:gap-[60px] lg:items-start">
-        <div className="order-2 flex min-w-0 w-full flex-1 flex-col gap-[10px] sm:flex-row lg:order-1">
-          {f.images.map((img, i) => (
-            <FeaturedImage
-              key={img.src + i}
-              src={img.src}
-              alt={i === 0 ? `${f.name} — look one` : `${f.name} — look two`}
-              aspectClass={img.aspectClass}
-              crop={img.crop}
+    <div className="px-[68px] pt-[128px] pb-[60px]">
+      <div className="-mt-[30px] flex items-start gap-[60px]">
+        {/* Left — gallery: portrait pair + wide landscape */}
+        <div className="flex min-w-0 flex-1 flex-col gap-[10.139px]">
+          {/* Row 1: two portrait shots side by side */}
+          <div className="flex w-full items-start gap-[10.139px]">
+            <CroppedImage
+              src="/DSC09826.JPEG"
+              alt="Yoruba Linen Shirt — look one"
+              aspectClass="aspect-[699/932]"
+              crop={{ w: "235%", h: "117.5%", left: "-67.5%", top: "-12.93%" }}
             />
-          ))}
+            <CroppedImage
+              src="/DSC09979.JPEG"
+              alt="Yoruba Linen Shirt — look two"
+              aspectClass="aspect-[884.25/1179]"
+              crop={{ w: "254%", h: "127%", left: "-67.3%", top: "-24.11%" }}
+            />
+          </div>
+          {/* Row 2: wide landscape — spans the full column width */}
+          <CroppedImage
+            src="/DSC09765-2.JPEG"
+            alt="Yoruba Linen Shirt — wide"
+            aspectClass="aspect-[2000/1333]"
+            wrapClass="relative w-full"
+            crop={{ w: "100%", h: "100%", left: "0%", top: "0%" }}
+          />
         </div>
 
-        <div className="order-1 flex w-full min-w-0 shrink-0 flex-col gap-[41px] lg:order-2 lg:sticky lg:top-[96px] lg:z-10 lg:max-h-[calc(100dvh-96px)] lg:overflow-y-auto lg:overscroll-y-contain lg:pl-1">
-          <div className="flex w-full max-w-[335px] flex-col gap-10 font-[family-name:var(--font-geist-mono)] text-sm font-light leading-normal text-black lg:gap-[40px]">
-            <div className="flex w-full items-end justify-between gap-4 leading-normal">
-              <h1 className="font-[family-name:var(--font-ojuju)] text-lg font-medium text-black">
-                {f.name}
-              </h1>
-              <p className="w-10 shrink-0 text-right text-base font-light text-[#808080]">
-                {f.seasonCode}
+        {/* Right — product info (sticky: scrolls with page until stuck; images on the left keep scrolling) */}
+        {/* sticky top = SS26Nav height: py-[36px]×2 + h-[60px] logo = 132px */}
+        <div className="sticky top-[132px] z-10 flex min-h-0 w-full max-w-[335px] shrink-0 flex-col items-start gap-[41px] self-start overflow-y-auto overscroll-y-contain max-h-[calc(100dvh-132px)]">
+          {/* Top block: name · price · description (335px wide) */}
+          <div className="flex w-[335px] flex-col gap-[40px]">
+            <div className="flex w-full items-end justify-between leading-normal">
+              <p className="font-[family-name:var(--font-ojuju)] shrink-0 whitespace-nowrap text-[18px] font-medium not-italic text-black">
+                Yoruba Linen Shirt
+              </p>
+              <p className="font-[family-name:var(--font-geist-mono)] w-[39px] shrink-0 text-right text-[16px] font-light text-[#808080]">
+                SS26
               </p>
             </div>
-            <p className="text-sm font-light text-black">
-              {formatSS26PriceCAD(f.priceCents)}
+
+            <p className="font-[family-name:var(--font-geist-mono)] leading-normal text-[14px] font-light text-black">
+              $179.99 CAD
             </p>
-            <div className="w-full max-w-[335px] whitespace-pre-wrap">
-              {f.description.map((para, i) => (
-                <p key={i} className={i > 0 ? "mt-6" : undefined}>
-                  {para}
-                </p>
-              ))}
-            </div>
+
+            <p className="font-[family-name:var(--font-geist-mono)] w-[335px] whitespace-pre-wrap text-[14px] font-light leading-normal text-black">
+              {`Slowly Made from 100% linen in a small town in India, this piece of garment can be worn as an overshirt all season or on its own during hot summer seasons.\n\nTaking inspiration from Yoruba styled pockets and the richness of garment construction in India. To achieve our summer colours this shirt is garment dyed in azo-free dyes.`}
+            </p>
           </div>
 
-          <div className="flex w-full max-w-[225px] flex-col gap-[153px]">
-            <div className="flex flex-col gap-[60px]">
-              <div className="flex flex-col gap-5">
-                <p className="font-[family-name:var(--font-geist-mono)] text-sm font-light text-[#808080]">
+          {/* Bottom block: colour · size · cta (225px wide) */}
+          <div className="flex w-[225px] flex-col items-start gap-[153px]">
+            <div className="flex w-full flex-col gap-[60px]">
+              {/* COLOUR */}
+              <div className="flex w-full flex-col gap-[20px]">
+                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
                   COLOUR
                 </p>
-                <div
-                  className="flex flex-col gap-3"
-                  role="list"
-                  aria-label="Colour options"
-                >
-                  {f.colours.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      role="listitem"
-                      className="flex h-14 w-14 rounded-full border border-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
-                      style={{ backgroundColor: c.hex }}
-                      aria-label={`Colour ${c.id}`}
-                    />
-                  ))}
+                <div className="flex h-[80px] w-[35px] flex-col items-start justify-between">
+                  <button
+                    type="button"
+                    aria-label="Colour rust"
+                    className="h-[35px] w-[35px] rounded-full transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+                    style={{ backgroundColor: "#963927" }}
+                  />
+                  <button
+                    type="button"
+                    aria-label="Colour dark brown"
+                    className="h-[35px] w-[35px] rounded-full transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+                    style={{ backgroundColor: "#4B2620" }}
+                  />
                 </div>
               </div>
-              <div className="flex flex-col gap-5 leading-normal">
-                <p className="font-[family-name:var(--font-geist-mono)] text-sm font-light text-[#808080]">
+
+              {/* SIZE */}
+              <div className="flex w-full flex-col gap-[20px] leading-normal">
+                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
                   SIZE
                 </p>
-                <div
-                  className="flex flex-wrap items-center gap-x-[35px] gap-y-2 text-xl text-black"
-                  role="group"
-                  aria-label="Sizes"
-                >
-                  {f.sizes.map((size) => (
+                <div className="flex w-full items-center gap-[35px] whitespace-nowrap not-italic text-[20px] text-black">
+                  {(
+                    [
+                      ["XS", "font-medium"],
+                      ["S", "font-medium"],
+                      ["M", "font-semibold"],
+                      ["L", "font-medium"],
+                      ["XL", "font-medium"],
+                    ] as const
+                  ).map(([size, weight]) => (
                     <span
                       key={size}
-                      className={`font-[family-name:var(--font-ojuju)] whitespace-nowrap ${
-                        size === f.defaultSize
-                          ? "font-semibold"
-                          : "font-medium"
-                      }`}
+                      className={`font-[family-name:var(--font-ojuju)] shrink-0 ${weight}`}
                     >
                       {size}
                     </span>
@@ -144,24 +136,16 @@ export function SS26FigmaShop() {
               </div>
             </div>
 
+            {/* ADD TO CART */}
             <Link
               href="/cart"
-              className="inline-flex w-full max-w-[280px] items-center justify-center bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-base font-medium text-white transition-opacity hover:opacity-90"
+              className="-mt-[50px] inline-flex items-center justify-center overflow-hidden bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium whitespace-nowrap not-italic text-white transition-opacity hover:opacity-90"
             >
               ADD TO CART
             </Link>
           </div>
         </div>
       </div>
-
-      <p className="mt-16 text-center font-[family-name:var(--font-geist-mono)] text-xs text-[#555] sm:mt-20">
-        <Link
-          href="/"
-          className="uppercase tracking-[0.2em] text-[#1a1a1a] underline-offset-4 transition-opacity hover:opacity-60 hover:underline"
-        >
-          Back to home
-        </Link>
-      </p>
     </div>
   );
 }

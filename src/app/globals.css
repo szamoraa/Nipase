@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #1a1a1a;
-  --nav-h: 88px;
+  --nav-h: 132px;
 }
 
 @theme inline {

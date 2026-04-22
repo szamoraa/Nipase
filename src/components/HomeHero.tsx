@@ -31,7 +31,7 @@ export function HomeHero({ heroSrc = DEFAULT_HERO_SRC }: HomeHeroProps) {
 
   return (
     <section
-      className="relative h-[57.5vh] min-h-[240px] w-full bg-white"
+      className="relative min-h-screen w-full bg-white"
       aria-label="Nipase hero"
     >
       {showImage ? (
@@ -52,10 +52,10 @@ export function HomeHero({ heroSrc = DEFAULT_HERO_SRC }: HomeHeroProps) {
         </>
       ) : null}
 
-      {/* Positioned at the true viewport centre (accounts for nav height via --nav-h) */}
+      {/* Centred in the visible area below the fixed nav */}
       <div
         className="absolute left-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-        style={{ top: "calc(50vh - var(--nav-h, 88px))" }}
+        style={{ top: "calc(50vh + var(--nav-h, 132px) / 2)" }}
       >
         <h1 className="sr-only">Nipase</h1>
         <HeroVideo
