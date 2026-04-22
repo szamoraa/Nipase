@@ -6,14 +6,14 @@ import { Nav } from "@/components/Nav";
 import "./globals.css";
 
 const ojuju = localFont({
-  src: "../../Ojuju/Ojuju-VariableFont_wght.ttf",
+  src: "./fonts/Ojuju-VariableFont_wght.ttf",
   variable: "--font-ojuju",
   display: "swap",
   weight: "200 800",
 });
 
 const geistMono = localFont({
-  src: "../../GeistMono-Regular.woff2",
+  src: "./fonts/GeistMono-Regular.woff2",
   variable: "--font-geist-mono",
   display: "swap",
   weight: "400",
