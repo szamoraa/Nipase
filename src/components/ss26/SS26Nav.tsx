@@ -3,7 +3,7 @@ import Link from "next/link";
 
 /**
  * SS26 shop header — matches Figma PDP (node 47:4):
- * wordmark (82×36.885) · center Agbalumo mark (60×60) · ABOUT / CART (Ojuju Medium 16.533px, gap 29px).
+ * wordmark (82×36.885) · center Agbalumo mark (60×60) · CART (Ojuju Medium 16.533px, gap 29px).
  * Static (not fixed) so the 128px gap to page content is just natural flow.
  */
 export function SS26Nav() {
@@ -44,14 +44,6 @@ export function SS26Nav() {
         </Link>
 
         <ul className="flex shrink-0 items-center gap-[29px]">
-          <li>
-            <Link
-              href="/about"
-              className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-black no-underline transition-opacity hover:opacity-55"
-            >
-              ABOUT
-            </Link>
-          </li>
           <li>
             <Link
               href="/cart"

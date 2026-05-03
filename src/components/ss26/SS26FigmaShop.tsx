@@ -78,7 +78,7 @@ export function SS26FigmaShop() {
             </div>
 
             <p className="font-[family-name:var(--font-geist-mono)] leading-normal text-[14px] font-light text-black">
-              $179.99 CAD
+              CA$179.99
             </p>
 
             <p className="font-[family-name:var(--font-geist-mono)] w-[335px] whitespace-pre-wrap text-[14px] font-light leading-normal text-black">
@@ -94,18 +94,12 @@ export function SS26FigmaShop() {
                 <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
                   COLOUR
                 </p>
-                <div className="flex h-[80px] w-[35px] flex-col items-start justify-between">
+                <div className="flex w-[35px]">
                   <button
                     type="button"
                     aria-label="Colour rust"
                     className="h-[35px] w-[35px] rounded-full transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
                     style={{ backgroundColor: "#963927" }}
-                  />
-                  <button
-                    type="button"
-                    aria-label="Colour dark brown"
-                    className="h-[35px] w-[35px] rounded-full transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
-                    style={{ backgroundColor: "#4B2620" }}
                   />
                 </div>
               </div>

@@ -54,14 +54,6 @@ export function Nav() {
         <ul className="flex items-center gap-[29px]">
           <li>
             <Link
-              href="/about"
-              className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-white no-underline transition-opacity hover:opacity-50"
-            >
-              ABOUT
-            </Link>
-          </li>
-          <li>
-            <Link
               href="/cart"
               className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-white no-underline transition-opacity hover:opacity-50"
             >
