@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 
 export function Nav() {
   const pathname = usePathname() ?? "";
+  const { itemCount } = useCart();
   const showCenterLogo = pathname !== "/";
   /** SS26 shop uses its own dedicated header (`SS26Nav`) per Figma; bail out so we don't render two. */
   if (pathname.startsWith("/shop/ss26")) {
@@ -13,9 +15,9 @@ export function Nav() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full mix-blend-difference">
+    <header className={`fixed top-0 left-0 right-0 z-50 w-full ${pathname === "/cart" ? "" : "mix-blend-difference"}`}>
       <nav
-        className="relative flex items-center justify-center gap-10 py-[36px]"
+        className="relative flex items-center justify-between px-[68px] py-[36px]"
         aria-label="Primary"
       >
         {showCenterLogo && (
@@ -57,7 +59,7 @@ export function Nav() {
               href="/cart"
               className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-white no-underline transition-opacity hover:opacity-50"
             >
-              CART
+              CART{itemCount > 0 && ` (${itemCount})`}
             </Link>
           </li>
         </ul>

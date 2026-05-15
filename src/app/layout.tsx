@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 
 import { Nav } from "@/components/Nav";
+import { CartProvider } from "@/context/CartContext";
 
 import "./globals.css";
 
@@ -32,8 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${ojuju.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-white text-[#1a1a1a] [isolation:isolate]">
-        <Nav />
-        {children}
+        <CartProvider>
+          <Nav />
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
