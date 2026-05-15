@@ -33,6 +33,20 @@ export default function Home() {
             sizes="(max-width: 640px) 100vw, 627px"
           />
         </Link>
+        <div className="mt-6 flex items-center justify-between">
+          <Link
+            href="/shop/ss26"
+            className="text-xs uppercase tracking-[0.25em] text-[#1a1a1a] underline-offset-4 hover:underline"
+          >
+            Shop SS26
+          </Link>
+          <Link
+            href="/cart"
+            className="text-xs uppercase tracking-[0.25em] text-[#555] underline-offset-4 hover:underline"
+          >
+            View bag
+          </Link>
+        </div>
       </div>
     </div>
   );

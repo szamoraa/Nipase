@@ -1,12 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
-/**
- * SS26 shop header — matches Figma PDP (node 47:4):
- * wordmark (82×36.885) · center Agbalumo mark (60×60) · CART (Ojuju Medium 16.533px, gap 29px).
- * Static (not fixed) so the 128px gap to page content is just natural flow.
- */
 export function SS26Nav() {
+  const { itemCount } = useCart();
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <nav
@@ -49,7 +49,7 @@ export function SS26Nav() {
               href="/cart"
               className="font-[family-name:var(--font-ojuju)] text-[16.533px] font-medium text-black no-underline transition-opacity hover:opacity-55"
             >
-              CART
+              CART{itemCount > 0 && ` (${itemCount})`}
             </Link>
           </li>
         </ul>
