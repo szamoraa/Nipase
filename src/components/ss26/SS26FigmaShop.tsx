@@ -4,8 +4,14 @@ import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
 
+/**
+ * Size labels map positionally to Shopify variant order (index 0–4).
+ * Shopify variant titles: "… / Extra Small", "… / Small", etc.
+ * Keep this array in the same order as variants are set up in the store.
+ */
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
+const SIZE_INDEX: Record<Size, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4 };
 
 /**
  * Local fallback gallery — only used if Shopify returns zero images
@@ -27,7 +33,15 @@ export function SS26FigmaShop({ product }: Props) {
   const [status, setStatus] = useState<"idle" | "adding" | "added">("idle");
   const { addToCart } = useCart();
 
-  const variant = product?.variants[0] ?? null;
+  // Resolve to the variant that matches the selected size by position.
+  const selectedVariant =
+    product && selectedSize
+      ? (product.variants[SIZE_INDEX[selectedSize]] ?? product.variants[0] ?? null)
+      : (product?.variants[0] ?? null);
+
+  // For availability display purposes (price shown before size selection).
+  const firstVariant = product?.variants[0] ?? null;
+
   const gallery =
     product?.images && product.images.length > 0
       ? product.images.map((img, i) => ({
@@ -37,10 +51,10 @@ export function SS26FigmaShop({ product }: Props) {
       : FALLBACK_GALLERY;
 
   async function handleAddToCart() {
-    if (!variant || !selectedSize || status === "adding") return;
+    if (!selectedVariant || !selectedSize || status === "adding") return;
     setStatus("adding");
     try {
-      await addToCart(variant.id);
+      await addToCart(selectedVariant.id);
       setStatus("added");
       setTimeout(() => setStatus("idle"), 2000);
     } catch {
@@ -86,9 +100,9 @@ export function SS26FigmaShop({ product }: Props) {
           <div className="flex flex-col gap-[41px]">
             {/* Price + description */}
             <div className="flex flex-col gap-[83px]">
-              {variant && (
+              {firstVariant && (
                 <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light leading-normal text-black">
-                  {formatShopifyPrice(variant.price.amount, variant.price.currencyCode)}
+                  {formatShopifyPrice(firstVariant.price.amount, firstVariant.price.currencyCode)}
                 </p>
               )}
               <p className="font-[family-name:var(--font-geist-mono)] w-full whitespace-pre-wrap text-[14px] font-light leading-normal text-[#1a1d24]">
@@ -123,7 +137,7 @@ export function SS26FigmaShop({ product }: Props) {
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={!variant || !selectedSize || status === "adding"}
+              disabled={!firstVariant || !selectedSize || status === "adding"}
               className="self-start inline-flex items-center justify-center overflow-hidden rounded-[60px] bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium not-italic whitespace-nowrap leading-normal text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {ctaLabel}
