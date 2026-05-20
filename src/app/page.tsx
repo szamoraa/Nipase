@@ -1,7 +1,28 @@
-/** Vimeo background-mode embed — autoplay, muted, looped, no controls. */
-const VIMEO_ID = "1193786975";
+import { SpinningWheel } from "@/components/SpinningWheel";
+import { getShopifyProduct } from "@/lib/product";
 
-export default function Home() {
+const VIMEO_ID = "1193786975";
+const SS26_PRODUCT_ID = "gid://shopify/Product/8005607030886";
+
+/**
+ * Local fallback so the wheel is never empty if Shopify returns no
+ * images. These mirror the SS26 page fallback set.
+ */
+const FALLBACK_IMAGES = [
+  { url: "/nipase-100gbani.jpg", altText: "Nipase look one" },
+  { url: "/nipase-100gbani-1.jpg", altText: "Nipase look two" },
+  { url: "/nipase-100gbani-2.jpg", altText: "Nipase look three" },
+  { url: "/nipase-100gbani-3.jpg", altText: "Nipase look four" },
+  { url: "/nipase-dsc09849.jpg", altText: "Nipase look five" },
+] as const;
+
+export const revalidate = 60;
+
+export default async function Home() {
+  const product = await getShopifyProduct(SS26_PRODUCT_ID);
+  const wheelImages =
+    product?.images && product.images.length > 0 ? product.images : FALLBACK_IMAGES;
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-white px-[60px] pt-[60px] pb-[45px] md:px-[238px]">
 
@@ -23,36 +44,7 @@ export default function Home() {
       </div>
 
       {/* SS26 spinning wheel — access point to shop */}
-      <div className="flex justify-center py-28">
-        <a href="/shop/ss26" aria-label="Shop SS26" className="group block outline-none">
-          <div
-            className="relative"
-            style={{
-              width: "clamp(300px, 40vw, 640px)",
-              height: "clamp(300px, 40vw, 640px)",
-              animation: "spin-wheel 28s linear infinite",
-              willChange: "transform",
-            }}
-          >
-            {[0, 45, 90, 135].map((angle) => (
-              <div
-                key={angle}
-                className="absolute inset-0 flex items-center justify-between"
-                style={{ transform: `rotate(${angle}deg)`, padding: "clamp(4px, 0.6vw, 8px)" }}
-              >
-                <div
-                  className="shrink-0 overflow-hidden rounded-[clamp(14px,1.8vw,24px)] bg-[#000002] transition-opacity duration-500 group-hover:opacity-80"
-                  style={{ width: "clamp(80px, 10vw, 130px)", height: "clamp(70px, 8.75vw, 113px)" }}
-                />
-                <div
-                  className="shrink-0 overflow-hidden rounded-[clamp(14px,1.8vw,24px)] bg-[#000002] transition-opacity duration-500 group-hover:opacity-80"
-                  style={{ width: "clamp(80px, 10vw, 130px)", height: "clamp(70px, 8.75vw, 113px)" }}
-                />
-              </div>
-            ))}
-          </div>
-        </a>
-      </div>
+      <SpinningWheel images={wheelImages} />
     </div>
   );
 }

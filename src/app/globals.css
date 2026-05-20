@@ -24,3 +24,13 @@ body {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
+/**
+ * Counter-spin cancels the wheel parent's rotation, keeping each pill
+ * (and its image) perfectly upright as the wheel orbits. Must use the
+ * exact same duration + easing as spin-wheel so they stay in sync.
+ */
+@keyframes counter-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
