@@ -7,20 +7,17 @@ import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
 
-/** Two product images — stacked vertically in the main gallery column. */
-const GALLERY = [
-  {
-    src: "/DSC09826.JPEG",
-    alt: "look one",
-    aspect: "aspect-[3/4]",
-    crop: { w: "235%", h: "117.5%", left: "-67.5%", top: "-12.93%" },
-  },
-  {
-    src: "/DSC09979.JPEG",
-    alt: "look two",
-    aspect: "aspect-[3/4]",
-    crop: { w: "254%", h: "127%", left: "-67.3%", top: "-24.11%" },
-  },
+/**
+ * Local fallback gallery — only used if Shopify returns zero images
+ * (e.g. during an outage). Production photos are managed in Shopify
+ * Admin → Products → Media and pulled via the Storefront API.
+ */
+const FALLBACK_GALLERY = [
+  { url: "/nipase-100gbani.jpg", altText: "look one" },
+  { url: "/nipase-100gbani-1.jpg", altText: "look two" },
+  { url: "/nipase-100gbani-2.jpg", altText: "look three" },
+  { url: "/nipase-100gbani-3.jpg", altText: "look four" },
+  { url: "/nipase-dsc09849.jpg", altText: "look five" },
 ] as const;
 
 type Props = { product: ShopifyProduct | null };
@@ -31,6 +28,13 @@ export function SS26FigmaShop({ product }: Props) {
   const { addToCart } = useCart();
 
   const variant = product?.variants[0] ?? null;
+  const gallery =
+    product?.images && product.images.length > 0
+      ? product.images.map((img, i) => ({
+          url: img.url,
+          altText: img.altText ?? `${product.title} — look ${i + 1}`,
+        }))
+      : FALLBACK_GALLERY;
 
   async function handleAddToCart() {
     if (!variant || !selectedSize || status === "adding") return;
@@ -56,16 +60,15 @@ export function SS26FigmaShop({ product }: Props) {
   return (
     <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[60px] pt-[60px] pb-[60px]">
 
-      {/* ── Images column — two tall images stacked vertically, capped at Figma size ── */}
+      {/* ── Images column — tall images stacked vertically, capped at Figma size ── */}
       <div className="flex min-w-0 flex-1 flex-col gap-[30px] max-w-[489px]">
-        {GALLERY.map(({ src, alt, aspect, crop }) => (
-          <div key={src} className={`relative w-full overflow-hidden ${aspect}`}>
+        {gallery.map(({ url, altText }) => (
+          <div key={url} className="relative aspect-[3/4] w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={src}
-              alt={`${product?.title ?? "Product"} — ${alt}`}
-              className="pointer-events-none absolute max-w-none"
-              style={{ width: crop.w, height: crop.h, left: crop.left, top: crop.top }}
+              src={url}
+              alt={altText}
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
           </div>
         ))}
@@ -142,17 +145,16 @@ export function SS26FigmaShop({ product }: Props) {
         </div>
       </div>
 
-      {/* ── Right filmstrip — 4 small thumbnails, mirrors Figma right column ── */}
+      {/* ── Right filmstrip — small thumbnails mirror the main column order ── */}
       {/* Offset matches sunburst height (58px) + gap (201px) + top inset (60px) */}
       <div className="sticky top-[319px] flex w-[47px] shrink-0 flex-col gap-[16px] self-start">
-        {[...GALLERY, ...GALLERY].map(({ src, alt, aspect, crop }, i) => (
-          <div key={i} className={`relative w-full overflow-hidden ${aspect}`}>
+        {gallery.map(({ url, altText }, i) => (
+          <div key={url} className="relative aspect-[3/4] w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={src}
-              alt={`${product?.title ?? "Product"} — thumbnail ${i + 1}`}
-              className="pointer-events-none absolute max-w-none"
-              style={{ width: crop.w, height: crop.h, left: crop.left, top: crop.top }}
+              src={url}
+              alt={altText ?? `thumbnail ${i + 1}`}
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
           </div>
         ))}
