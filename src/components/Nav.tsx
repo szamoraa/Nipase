@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
@@ -13,6 +14,8 @@ const NAV_LINKS = [
 /** Global fixed shell — renders on every page. */
 export function Nav() {
   const { itemCount } = useCart();
+  const pathname = usePathname() ?? "";
+  const isHome = pathname === "/";
 
   return (
     <>
@@ -30,9 +33,11 @@ export function Nav() {
                 className="h-auto w-[54px]"
               />
             </Link>
-            <p className="w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002]">
-              Centred on the richness of one&rsquo;s being.
-            </p>
+            {isHome && (
+              <p className="w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002]">
+                Centred on the richness of one&rsquo;s being.
+              </p>
+            )}
           </div>
 
           <nav aria-label="Primary" className="flex w-[64px] flex-col gap-[18px]">

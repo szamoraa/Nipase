@@ -4,38 +4,26 @@ import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
 
-function CroppedImage({
-  src,
-  alt,
-  aspectClass,
-  crop,
-  wrapClass = "relative min-w-0 flex-1 overflow-hidden",
-}: {
-  src: string;
-  alt: string;
-  aspectClass: string;
-  crop: { w: string; h: string; left: string; top: string };
-  wrapClass?: string;
-}) {
-  return (
-    <div className={`${wrapClass} overflow-hidden ${aspectClass}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        className="pointer-events-none absolute max-w-none"
-        style={{ width: crop.w, height: crop.h, left: crop.left, top: crop.top }}
-      />
-    </div>
-  );
-}
-
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
 
-type Props = {
-  product: ShopifyProduct | null;
-};
+/** Two product images — stacked vertically in the main gallery column. */
+const GALLERY = [
+  {
+    src: "/DSC09826.JPEG",
+    alt: "look one",
+    aspect: "aspect-[699/932]",
+    crop: { w: "235%", h: "117.5%", left: "-67.5%", top: "-12.93%" },
+  },
+  {
+    src: "/DSC09979.JPEG",
+    alt: "look two",
+    aspect: "aspect-[884.25/1179]",
+    crop: { w: "254%", h: "127%", left: "-67.3%", top: "-24.11%" },
+  },
+] as const;
+
+type Props = { product: ShopifyProduct | null };
 
 export function SS26FigmaShop({ product }: Props) {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
@@ -66,94 +54,65 @@ export function SS26FigmaShop({ product }: Props) {
           : "ADD TO CART";
 
   return (
-    <div className="px-[68px] pt-[128px] pb-[60px]">
-      <div className="-mt-[30px] flex items-start gap-[60px]">
-        {/* Left — gallery */}
-        <div className="flex min-w-0 flex-1 flex-col gap-[10.139px]">
-          <div className="flex w-full items-start gap-[10.139px]">
-            <CroppedImage
-              src="/DSC09826.JPEG"
-              alt={`${product?.title ?? "Product"} — look one`}
-              aspectClass="aspect-[699/932]"
-              crop={{ w: "235%", h: "117.5%", left: "-67.5%", top: "-12.93%" }}
-            />
-            <CroppedImage
-              src="/DSC09979.JPEG"
-              alt={`${product?.title ?? "Product"} — look two`}
-              aspectClass="aspect-[884.25/1179]"
-              crop={{ w: "254%", h: "127%", left: "-67.3%", top: "-24.11%" }}
+    <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[60px] pt-[60px] pb-[60px]">
+
+      {/* ── Images column — two tall images stacked vertically ── */}
+      <div className="flex min-w-0 flex-1 flex-col gap-[30px]">
+        {GALLERY.map(({ src, alt, aspect, crop }) => (
+          <div key={src} className={`relative w-full overflow-hidden ${aspect}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt={`${product?.title ?? "Product"} — ${alt}`}
+              className="pointer-events-none absolute max-w-none"
+              style={{ width: crop.w, height: crop.h, left: crop.left, top: crop.top }}
             />
           </div>
-          <CroppedImage
-            src="/DSC09765-2.JPEG"
-            alt={`${product?.title ?? "Product"} — wide`}
-            aspectClass="aspect-[2000/1333]"
-            wrapClass="relative w-full"
-            crop={{ w: "100%", h: "100%", left: "0%", top: "0%" }}
-          />
-        </div>
+        ))}
+      </div>
 
-        {/* Right — sticky product info */}
-        <div className="sticky top-[132px] z-10 flex min-h-0 w-full max-w-[335px] shrink-0 flex-col items-start gap-[41px] self-start overflow-y-auto overscroll-y-contain max-h-[calc(100dvh-132px)]">
-          <div className="flex w-[335px] flex-col gap-[40px]">
-            <div className="flex w-full items-end justify-between leading-normal">
-              <p className="font-[family-name:var(--font-ojuju)] shrink-0 whitespace-nowrap text-[18px] font-medium not-italic text-black">
-                {product?.title ?? "—"}
-              </p>
-              <p className="font-[family-name:var(--font-geist-mono)] w-[39px] shrink-0 text-right text-[16px] font-light text-[#808080]">
-                SS26
+      {/* ── Product info column — sticky, 343 px wide ── */}
+      <div className="sticky top-[60px] flex max-h-[calc(100vh-120px)] w-[343px] shrink-0 flex-col gap-[117px] overflow-y-auto overscroll-contain py-[120px]">
+
+        {/* Upper block: title → price → description → size → CTA */}
+        <div className="flex flex-col gap-[18px]">
+          <p className="font-[family-name:var(--font-ojuju)] text-[20px] font-medium not-italic leading-normal text-black">
+            {product?.title ?? "Yoruba Linen Shirt"}
+          </p>
+
+          <div className="flex flex-col gap-[41px]">
+            {/* Price + description */}
+            <div className="flex flex-col gap-[83px]">
+              {variant && (
+                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light leading-normal text-black">
+                  {formatShopifyPrice(variant.price.amount, variant.price.currencyCode)}
+                </p>
+              )}
+              <p className="font-[family-name:var(--font-geist-mono)] w-full whitespace-pre-wrap text-[14px] font-light leading-normal text-[#1a1d24]">
+                {product?.description ?? ""}
               </p>
             </div>
 
-            {variant && (
-              <p className="font-[family-name:var(--font-geist-mono)] leading-normal text-[14px] font-light text-black">
-                {formatShopifyPrice(variant.price.amount, variant.price.currencyCode)}
+            {/* SIZE */}
+            <div className="flex flex-col gap-[20px] leading-normal">
+              <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
+                SIZE
               </p>
-            )}
-
-            <p className="font-[family-name:var(--font-geist-mono)] w-[335px] whitespace-pre-wrap text-[14px] font-light leading-normal text-black">
-              {product?.description ?? ""}
-            </p>
-          </div>
-
-          <div className="flex w-[225px] flex-col items-start gap-[153px]">
-            <div className="flex w-full flex-col gap-[60px]">
-              {/* COLOUR */}
-              <div className="flex w-full flex-col gap-[20px]">
-                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
-                  COLOUR
-                </p>
-                <div className="flex">
+              <div className="flex items-center gap-[35px] whitespace-nowrap not-italic text-[20px] text-black">
+                {SIZES.map((size) => (
                   <button
+                    key={size}
                     type="button"
-                    aria-label="Colour rust"
-                    className="rounded-full transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
-                    style={{ backgroundColor: "#963927", width: 16, height: 16 }}
-                  />
-                </div>
-              </div>
-
-              {/* SIZE */}
-              <div className="flex w-full flex-col gap-[20px] leading-normal">
-                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
-                  SIZE
-                </p>
-                <div className="flex w-full items-center gap-[35px] whitespace-nowrap not-italic text-[20px] text-black">
-                  {SIZES.map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setSelectedSize(size)}
-                      className={`font-[family-name:var(--font-ojuju)] shrink-0 transition-opacity ${
-                        selectedSize === size
-                          ? "font-semibold underline underline-offset-4"
-                          : "font-medium opacity-40 hover:opacity-100"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
+                    onClick={() => setSelectedSize(size)}
+                    className={`font-[family-name:var(--font-ojuju)] shrink-0 transition-opacity ${
+                      selectedSize === size
+                        ? "font-semibold underline underline-offset-4"
+                        : "font-medium opacity-40 hover:opacity-100"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -162,12 +121,41 @@ export function SS26FigmaShop({ product }: Props) {
               type="button"
               onClick={handleAddToCart}
               disabled={!variant || !selectedSize || status === "adding"}
-              className="-mt-[50px] inline-flex items-center justify-center overflow-hidden bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium whitespace-nowrap not-italic text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="self-start inline-flex items-center justify-center overflow-hidden rounded-[60px] bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium not-italic whitespace-nowrap leading-normal text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {ctaLabel}
             </button>
           </div>
         </div>
+
+        {/* Lower block: materials + care */}
+        <div className="flex flex-col gap-[50px] font-[family-name:var(--font-geist-mono)] text-[14px] font-light leading-normal text-black">
+          <div className="flex flex-col gap-[10px]">
+            <p>100% linen</p>
+            <p>Azo-free dyes</p>
+          </div>
+          <div className="flex flex-col gap-[10px]">
+            <p>Wash cold</p>
+            <p>Lay flat to dry</p>
+            <p>Iron damp</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right filmstrip — 4 small thumbnails, mirrors Figma right column ── */}
+      {/* Offset matches sunburst height (58px) + gap (201px) + top inset (60px) */}
+      <div className="sticky top-[319px] flex w-[47px] shrink-0 flex-col gap-[16px] self-start">
+        {[...GALLERY, ...GALLERY].map(({ src, alt, aspect, crop }, i) => (
+          <div key={i} className={`relative w-full overflow-hidden ${aspect}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt={`${product?.title ?? "Product"} — thumbnail ${i + 1}`}
+              className="pointer-events-none absolute max-w-none"
+              style={{ width: crop.w, height: crop.h, left: crop.left, top: crop.top }}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
