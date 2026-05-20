@@ -19,3 +19,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-ojuju), ui-sans-serif, system-ui, sans-serif;
 }
+
+@keyframes spin-wheel {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
