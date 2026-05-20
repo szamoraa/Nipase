@@ -1,0 +1,23 @@
+# Build artifacts
+.next
+node_modules
+
+# Local agent / editor state
+.claude
+.cursor
+.git
+
+# Legacy scratch project
+nposi
+
+# Large video masters (ProRes / hi-res masters not used by the deployed site)
+*.mov
+*.MOV
+Nipase_Full_ColourBurn_Icon.mov
+Nipase_Full_ColourBurn_Wordmark.mov
+Nipase_Website_VideoA.mov
+"Nipase_video_Agbalumo Logo.mov"
+
+# Local-only assets
+DSC*.JPEG
+*.tsbuildinfo
