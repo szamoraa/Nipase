@@ -12,13 +12,13 @@ const GALLERY = [
   {
     src: "/DSC09826.JPEG",
     alt: "look one",
-    aspect: "aspect-[699/932]",
+    aspect: "aspect-[3/4]",
     crop: { w: "235%", h: "117.5%", left: "-67.5%", top: "-12.93%" },
   },
   {
     src: "/DSC09979.JPEG",
     alt: "look two",
-    aspect: "aspect-[884.25/1179]",
+    aspect: "aspect-[3/4]",
     crop: { w: "254%", h: "127%", left: "-67.3%", top: "-24.11%" },
   },
 ] as const;
@@ -56,8 +56,8 @@ export function SS26FigmaShop({ product }: Props) {
   return (
     <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[60px] pt-[60px] pb-[60px]">
 
-      {/* ── Images column — two tall images stacked vertically ── */}
-      <div className="flex min-w-0 flex-1 flex-col gap-[30px]">
+      {/* ── Images column — two tall images stacked vertically, capped at Figma size ── */}
+      <div className="flex min-w-0 flex-1 flex-col gap-[30px] max-w-[489px]">
         {GALLERY.map(({ src, alt, aspect, crop }) => (
           <div key={src} className={`relative w-full overflow-hidden ${aspect}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
