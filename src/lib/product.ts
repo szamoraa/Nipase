@@ -1,4 +1,4 @@
-import { shopify } from "./shopify";
+import { getShopifyClient } from "./shopify";
 
 export type ShopifyVariant = {
   id: string;
@@ -33,15 +33,23 @@ const GET_PRODUCT = /* GraphQL */ `
 `;
 
 export async function getShopifyProduct(id: string): Promise<ShopifyProduct | null> {
-  const { data } = await shopify.request(GET_PRODUCT, { variables: { id } });
-  const p = data?.product;
-  if (!p) return null;
-  return {
-    id: p.id,
-    title: p.title,
-    description: p.description,
-    variants: p.variants.edges.map((e: { node: ShopifyVariant }) => e.node),
-  };
+  const shopify = getShopifyClient();
+  if (!shopify) return null;
+
+  try {
+    const { data } = await shopify.request(GET_PRODUCT, { variables: { id } });
+    const p = data?.product;
+    if (!p) return null;
+    return {
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      variants: p.variants.edges.map((e: { node: ShopifyVariant }) => e.node),
+    };
+  } catch (error) {
+    console.error("[shopify] getShopifyProduct failed:", error);
+    return null;
+  }
 }
 
 export function formatShopifyPrice(amount: string, currencyCode: string): string {

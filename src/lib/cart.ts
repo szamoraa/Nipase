@@ -1,4 +1,4 @@
-import { shopify } from "./shopify";
+import { getShopifyClient } from "./shopify";
 
 export type CartLine = {
   id: string;
@@ -79,8 +79,14 @@ const GET_CART = /* GraphQL */ `
   }
 `;
 
+function requireClient() {
+  const client = getShopifyClient();
+  if (!client) throw new Error("Shopify storefront is not configured");
+  return client;
+}
+
 export async function cartCreate(variantId: string, quantity = 1): Promise<Cart> {
-  const { data, errors } = await shopify.request(CART_CREATE, {
+  const { data, errors } = await requireClient().request(CART_CREATE, {
     variables: { lines: [{ merchandiseId: variantId, quantity }] },
   });
   if (errors) throw new Error("Failed to create cart");
@@ -92,7 +98,7 @@ export async function cartLinesAdd(
   variantId: string,
   quantity = 1
 ): Promise<Cart> {
-  const { data, errors } = await shopify.request(CART_LINES_ADD, {
+  const { data, errors } = await requireClient().request(CART_LINES_ADD, {
     variables: { cartId, lines: [{ merchandiseId: variantId, quantity }] },
   });
   if (errors) throw new Error("Failed to add to cart");
@@ -100,7 +106,7 @@ export async function cartLinesAdd(
 }
 
 export async function cartLinesRemove(cartId: string, lineId: string): Promise<Cart> {
-  const { data, errors } = await shopify.request(CART_LINES_REMOVE, {
+  const { data, errors } = await requireClient().request(CART_LINES_REMOVE, {
     variables: { cartId, lineIds: [lineId] },
   });
   if (errors) throw new Error("Failed to remove from cart");
@@ -108,6 +114,8 @@ export async function cartLinesRemove(cartId: string, lineId: string): Promise<C
 }
 
 export async function getCart(cartId: string): Promise<Cart | null> {
-  const { data } = await shopify.request(GET_CART, { variables: { cartId } });
+  const client = getShopifyClient();
+  if (!client) return null;
+  const { data } = await client.request(GET_CART, { variables: { cartId } });
   return data?.cart ?? null;
 }
