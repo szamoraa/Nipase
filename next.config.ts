@@ -6,6 +6,9 @@ import { fileURLToPath } from "url";
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: "/story", destination: "/about", permanent: true }];
+  },
   turbopack: {
     root: projectRoot,
   },

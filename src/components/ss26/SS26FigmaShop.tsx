@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { resolveGalleryImages } from "@/lib/ss26";
 import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
 
 /**
@@ -12,19 +13,6 @@ import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
 const SIZE_INDEX: Record<Size, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4 };
-
-/**
- * Local fallback gallery — only used if Shopify returns zero images
- * (e.g. during an outage). Production photos are managed in Shopify
- * Admin → Products → Media and pulled via the Storefront API.
- */
-const FALLBACK_GALLERY = [
-  { url: "/nipase-100gbani.jpg", altText: "look one" },
-  { url: "/nipase-100gbani-1.jpg", altText: "look two" },
-  { url: "/nipase-100gbani-2.jpg", altText: "look three" },
-  { url: "/nipase-100gbani-3.jpg", altText: "look four" },
-  { url: "/nipase-dsc09849.jpg", altText: "look five" },
-] as const;
 
 type Props = { product: ShopifyProduct | null };
 
@@ -42,13 +30,7 @@ export function SS26FigmaShop({ product }: Props) {
   // For availability display purposes (price shown before size selection).
   const firstVariant = product?.variants[0] ?? null;
 
-  const gallery =
-    product?.images && product.images.length > 0
-      ? product.images.map((img, i) => ({
-          url: img.url,
-          altText: img.altText ?? `${product.title} — look ${i + 1}`,
-        }))
-      : FALLBACK_GALLERY;
+  const gallery = resolveGalleryImages(product);
 
   async function handleAddToCart() {
     if (!selectedVariant || !selectedSize || status === "adding") return;
