@@ -30,7 +30,7 @@ type Props = { product: ShopifyProduct | null };
 
 export function SS26FigmaShop({ product }: Props) {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
-  const [status, setStatus] = useState<"idle" | "adding" | "added">("idle");
+  const [status, setStatus] = useState<"idle" | "adding" | "added" | "error">("idle");
   const { addToCart } = useCart();
 
   // Resolve to the variant that matches the selected size by position.
@@ -57,8 +57,10 @@ export function SS26FigmaShop({ product }: Props) {
       await addToCart(selectedVariant.id);
       setStatus("added");
       setTimeout(() => setStatus("idle"), 2000);
-    } catch {
-      setStatus("idle");
+    } catch (err) {
+      console.error("[cart] addToCart failed:", err);
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 3000);
     }
   }
 
@@ -66,10 +68,12 @@ export function SS26FigmaShop({ product }: Props) {
     status === "adding"
       ? "ADDING…"
       : status === "added"
-        ? "ADDED!"
-        : !selectedSize
-          ? "SELECT A SIZE"
-          : "ADD TO CART";
+        ? "ADDED ✓"
+        : status === "error"
+          ? "TRY AGAIN"
+          : !selectedSize
+            ? "SELECT A SIZE"
+            : "ADD TO CART";
 
   return (
     <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[60px] pt-[60px] pb-[60px]">
@@ -138,7 +142,7 @@ export function SS26FigmaShop({ product }: Props) {
               type="button"
               onClick={handleAddToCart}
               disabled={!firstVariant || !selectedSize || status === "adding"}
-              className="self-start inline-flex items-center justify-center overflow-hidden rounded-[60px] bg-[#161920] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium not-italic whitespace-nowrap leading-normal text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className={`self-start inline-flex items-center justify-center overflow-hidden rounded-[60px] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium not-italic whitespace-nowrap leading-normal text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${status === "error" ? "bg-red-700" : "bg-[#161920]"}`}
             >
               {ctaLabel}
             </button>
