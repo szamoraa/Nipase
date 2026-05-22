@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { SS26_FALLBACK_GALLERY } from "@/lib/ss26";
+
+/** First fallback image — shown when Shopify product has no media yet. */
+const FALLBACK_IMG = SS26_FALLBACK_GALLERY[0].url;
 
 function formatPrice(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("en-US", {
@@ -52,17 +56,15 @@ export default function CartPage() {
 
             return (
               <li key={line.id} className="flex flex-col gap-[50px]">
-                {/* Product image — 3:4 aspect, full column width */}
-                {imgUrl && (
-                  <div className="relative aspect-[699/932] w-full overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imgUrl}
-                      alt={line.merchandise.product.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  </div>
-                )}
+                {/* Product image — 3:4 aspect, Shopify media or local fallback */}
+                <div className="relative aspect-[699/932] w-full overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgUrl ?? FALLBACK_IMG}
+                    alt={line.merchandise.product.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
 
                 {/* Product info */}
                 <div className="flex flex-col gap-[18px]">

@@ -75,11 +75,11 @@ export function SS26FigmaShop({ product }: Props) {
       </div>
 
       {/* ── Product info column — sticky, 343 px wide ── */}
-      <div className="sticky top-[60px] flex max-h-[calc(100vh-120px)] w-[343px] shrink-0 flex-col gap-[117px] overflow-y-auto overscroll-contain py-[120px]">
+      <div className="sticky top-[60px] flex max-h-[calc(100vh-120px)] w-[343px] shrink-0 flex-col gap-[132px] overflow-y-auto overscroll-contain py-[120px]">
 
         {/* Upper block: title → price → description → size → CTA */}
         <div className="flex flex-col gap-[18px]">
-          <p className="font-[family-name:var(--font-ojuju)] text-[20px] font-medium not-italic leading-normal text-black">
+          <p className="font-[family-name:var(--font-ojuju)] text-[18px] font-medium not-italic leading-normal text-black">
             {product?.title ?? "Yoruba Linen Shirt"}
           </p>
 
@@ -87,21 +87,21 @@ export function SS26FigmaShop({ product }: Props) {
             {/* Price + description */}
             <div className="flex flex-col gap-[83px]">
               {firstVariant && (
-                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light leading-normal text-black">
+                <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-normal text-black">
                   {formatShopifyPrice(firstVariant.price.amount, firstVariant.price.currencyCode)}
                 </p>
               )}
-              <p className="font-[family-name:var(--font-geist-mono)] w-full whitespace-pre-wrap text-[14px] font-light leading-normal text-[#1a1d24]">
+              <p className="font-[family-name:var(--font-geist-mono)] w-[305px] whitespace-pre-wrap text-[12px] font-normal leading-normal text-[#1a1d24]">
                 {product?.description ?? ""}
               </p>
             </div>
 
             {/* SIZE */}
             <div className="flex flex-col gap-[20px] leading-normal">
-              <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
+              <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light text-[#808080]">
                 SIZE
               </p>
-              <div className="flex items-center gap-[35px] whitespace-nowrap not-italic text-[20px] text-black">
+              <div className="flex items-center gap-[35px] whitespace-nowrap not-italic text-[16px] text-black">
                 {SIZES.map((size) => (
                   <button
                     key={size}
@@ -132,16 +132,12 @@ export function SS26FigmaShop({ product }: Props) {
         </div>
 
         {/* Lower block: materials + care */}
-        <div className="flex flex-col gap-[50px] font-[family-name:var(--font-geist-mono)] text-[14px] font-light leading-normal text-black">
-          <div className="flex flex-col gap-[10px]">
-            <p>100% linen</p>
-            <p>Azo-free dyes</p>
-          </div>
-          <div className="flex flex-col gap-[10px]">
-            <p>Wash cold</p>
-            <p>Lay flat to dry</p>
-            <p>Iron damp</p>
-          </div>
+        <div className="flex flex-col gap-[0px] font-[family-name:var(--font-geist-mono)] text-[12px] font-normal leading-normal text-[#1a1d24] w-[305px]">
+          <p>100% linen</p>
+          <p>Azo-free dyes</p>
+          <p className="mt-[1em]">Wash cold</p>
+          <p>Lay flat to dry</p>
+          <p>Iron damp</p>
         </div>
       </div>
 
