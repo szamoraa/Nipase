@@ -14,11 +14,20 @@ const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
 const SIZE_INDEX: Record<Size, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4 };
 
+const SIZE_CHART = [
+  { size: "XS", back: "67cm",   arm: "62cm",   chest: "46cm", shoulder: "38cm" },
+  { size: "S",  back: "70cm",   arm: "62.5cm", chest: "48cm", shoulder: "40cm" },
+  { size: "M",  back: "73cm",   arm: "64cm",   chest: "52cm", shoulder: "43cm" },
+  { size: "L",  back: "74.5cm", arm: "65cm",   chest: "53cm", shoulder: "44cm" },
+  { size: "XL", back: "75cm",   arm: "67cm",   chest: "56cm", shoulder: "40cm" },
+] as const;
+
 type Props = { product: ShopifyProduct | null };
 
 export function SS26FigmaShop({ product }: Props) {
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [status, setStatus] = useState<"idle" | "adding" | "added" | "error">("idle");
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   const { addToCart } = useCart();
 
   // Resolve to the variant that matches the selected size by position.
@@ -85,10 +94,14 @@ export function SS26FigmaShop({ product }: Props) {
             : "ADD TO CART";
 
   return (
-    <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[calc(60px+clamp(40px,3.5vw,54px)+30px)] pt-[60px] pb-[60px]">
+    /*
+     * Mobile:  flex-col, simple px-[20px] padding, pt clears the mobile nav bar
+     * Desktop: flex-row, complex sidebar-aware padding, filmstrip on right
+     */
+    <div className="flex min-h-screen flex-col gap-[40px] px-[20px] pt-[80px] pb-[60px] md:flex-row md:items-start md:gap-[60px] md:pl-[238px] md:pr-[calc(60px+clamp(40px,3.5vw,54px)+30px)] md:pt-[60px] md:pb-[60px]">
 
-      {/* ── Images column — tall images stacked vertically, capped at Figma size ── */}
-      <div className="flex min-w-0 flex-1 flex-col gap-[30px] max-w-[489px]">
+      {/* ── Images column ── */}
+      <div className="flex min-w-0 flex-1 flex-col gap-[20px] md:gap-[30px] md:max-w-[489px]">
         {gallery.map(({ url, altText }, i) => (
           <div
             key={`${url}-${i}`}
@@ -109,8 +122,10 @@ export function SS26FigmaShop({ product }: Props) {
         ))}
       </div>
 
-      {/* ── Product info column — sticky, 343 px wide ── */}
-      <div className="sticky top-[60px] flex w-[343px] shrink-0 flex-col gap-[132px] py-[220px]">
+      {/* ── Product info column
+          Mobile:  full width, normal flow, minimal padding
+          Desktop: sticky, 343px wide, large top/bottom padding ── */}
+      <div className="flex w-full flex-col gap-[40px] md:sticky md:top-[60px] md:w-[343px] md:shrink-0 md:gap-[92px] md:py-[220px]">
 
         {/* Upper block: title → price → description → size → CTA */}
         <div className="flex flex-col gap-[18px]">
@@ -120,13 +135,13 @@ export function SS26FigmaShop({ product }: Props) {
 
           <div className="flex flex-col gap-[41px]">
             {/* Price + description */}
-            <div className="flex flex-col gap-[83px]">
+            <div className="flex flex-col gap-[40px] md:gap-[60px]">
               {firstVariant && (
                 <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-normal text-black">
                   {formatShopifyPrice(firstVariant.price.amount, firstVariant.price.currencyCode)}
                 </p>
               )}
-              <p className="font-[family-name:var(--font-geist-mono)] w-[305px] whitespace-pre-wrap text-[12px] font-normal leading-normal text-[#1a1d24]">
+              <p className="font-[family-name:var(--font-geist-mono)] w-full whitespace-pre-wrap text-[12px] font-normal leading-normal text-[#1a1d24] md:w-[305px]">
                 {product?.description ?? ""}
               </p>
             </div>
@@ -136,7 +151,7 @@ export function SS26FigmaShop({ product }: Props) {
               <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light text-[#808080]">
                 SIZE
               </p>
-              <div className="flex items-center gap-[35px] whitespace-nowrap not-italic text-[16px] text-black">
+              <div className="flex items-center gap-[20px] whitespace-nowrap not-italic text-[16px] text-black md:gap-[35px]">
                 {SIZES.map((size) => (
                   <button
                     key={size}
@@ -166,20 +181,82 @@ export function SS26FigmaShop({ product }: Props) {
           </div>
         </div>
 
-        {/* Lower block: materials + care */}
-        <div className="flex flex-col gap-[0px] font-[family-name:var(--font-geist-mono)] text-[12px] font-normal leading-normal text-[#1a1d24] w-[305px]">
+        {/* Lower block: materials + care + size guide */}
+        <div className="flex flex-col gap-[0px] font-[family-name:var(--font-geist-mono)] text-[12px] font-normal leading-normal text-[#1a1d24] w-full md:w-[305px]">
           <p>100% linen</p>
           <p>Azo-free dyes</p>
           <p className="mt-[1em]">Wash cold</p>
           <p>Lay flat to dry</p>
           <p>Iron damp</p>
+          <button
+            type="button"
+            onClick={() => setShowSizeGuide(true)}
+            className="mt-[20px] self-start font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light text-[#808080] transition-opacity hover:opacity-60"
+          >
+            Size Guide
+          </button>
         </div>
       </div>
 
-      {/* ── Right filmstrip — fixed, directly below the sunburst logo ── */}
-      {/* Filmstrip — fixed at the same top as main content columns (280px) */}
+      {/* ── Size Guide modal ── */}
+      {showSizeGuide && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/20 backdrop-blur-[2px]"
+          onClick={() => setShowSizeGuide(false)}
+        >
+          <div
+            className="relative mx-[20px] w-full max-w-[460px] bg-white p-[36px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="mb-[28px] flex items-center justify-between">
+              <p className="font-[family-name:var(--font-ojuju)] text-[14px] font-medium text-[#000002]">
+                Size Guide
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowSizeGuide(false)}
+                aria-label="Close size guide"
+                className="font-[family-name:var(--font-geist-mono)] text-[18px] font-light leading-none text-[#808080] transition-opacity hover:opacity-60"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Table */}
+            <table className="w-full font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal">
+              <thead>
+                <tr>
+                  {["Size", "Back", "Arm", "Chest", "Shoulder"].map((h) => (
+                    <th key={h} className="pb-[12px] text-left font-light text-[#808080]">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {SIZE_CHART.map(({ size, back, arm, chest, shoulder }) => (
+                  <tr key={size} className="border-t border-[#dcdcdc]">
+                    <td className="py-[10px] text-[#000002]">{size}</td>
+                    <td className="py-[10px] text-[#1a1d24]">{back}</td>
+                    <td className="py-[10px] text-[#1a1d24]">{arm}</td>
+                    <td className="py-[10px] text-[#1a1d24]">{chest}</td>
+                    <td className="py-[10px] text-[#1a1d24]">{shoulder}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <p className="mt-[20px] font-[family-name:var(--font-geist-mono)] text-[10px] font-light text-[#808080]">
+              All measurements in centimetres.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Right filmstrip — desktop only, hidden on mobile ── */}
       <div
-        className="fixed right-[60px] z-40 flex flex-col gap-[16px]"
+        className="fixed right-[60px] z-40 hidden flex-col gap-[16px] md:flex"
         style={{ top: "280px", width: "clamp(40px, 3.5vw, 54px)" }}
       >
         {gallery.map(({ url, altText }, i) => (

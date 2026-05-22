@@ -22,8 +22,8 @@ export function Nav() {
 
   return (
     <>
-      {/* Wordmark + tagline — fixed top-left */}
-      <div className="fixed left-[60px] top-[60px] z-50 flex w-[178px] flex-col gap-[60px]">
+      {/* Wordmark — top-left, closer on mobile */}
+      <div className="fixed left-[20px] top-[20px] z-50 flex w-[178px] flex-col gap-[60px] md:left-[60px] md:top-[60px]">
         <Link href="/" aria-label="Nipase home" className="block w-[54px] transition-opacity hover:opacity-70">
           <Image
             src="/nipase-wordmark.svg"
@@ -34,15 +34,18 @@ export function Nav() {
             className="h-auto w-[54px]"
           />
         </Link>
-        <p className={`w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002] ${isHome ? "" : "invisible"}`}>
+        {/* Tagline — desktop only */}
+        <p className={`hidden w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002] md:block ${isHome ? "" : "md:invisible"}`}>
           Centred on the richness of one&rsquo;s being.
         </p>
       </div>
 
-      {/* Nav pills — fixed at the same top as main content columns (280px) */}
+      {/* Nav pills
+          Mobile:  horizontal row pinned bottom-left
+          Desktop: vertical column pinned left, 280px from top */}
       <nav
         aria-label="Primary"
-        className="fixed left-[60px] top-[280px] z-50 flex flex-col items-start gap-[18px]"
+        className="fixed bottom-[20px] left-[20px] z-50 flex flex-row items-center gap-[10px] md:bottom-auto md:left-[60px] md:top-[280px] md:flex-col md:items-start md:gap-[18px]"
       >
         {NAV_LINKS.map(({ label, href }) => {
           if (label === "CART") {
@@ -82,17 +85,23 @@ export function Nav() {
         })}
       </nav>
 
-      {/* Sunburst — fixed top-right on all pages */}
+      {/* Sunburst — top-right, closer on mobile */}
       <Link
         href="/"
         aria-label="Nipase home"
-        className="fixed right-[60px] top-[60px] z-50 block transition-opacity hover:opacity-70"
+        className="fixed right-[20px] top-[20px] z-50 block transition-opacity hover:opacity-70 md:right-[60px] md:top-[60px]"
       >
-        <Image src="/nipase-sunburst.svg" alt="" width={54} height={58} className="h-auto w-[clamp(40px,3.5vw,54px)]" />
+        <Image
+          src="/nipase-sunburst.svg"
+          alt=""
+          width={54}
+          height={58}
+          className="h-auto w-[32px] md:w-[clamp(40px,3.5vw,54px)]"
+        />
       </Link>
 
-      {/* Footer — fixed bottom-left on all pages */}
-      <div className="fixed bottom-[60px] left-[60px] z-50 flex flex-col font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002]">
+      {/* Footer credits — desktop only */}
+      <div className="fixed bottom-[60px] left-[60px] z-50 hidden flex-col font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002] md:flex">
         <p>Made in India</p>
         <p className="mt-[10px]">Based in Canada</p>
         <p className="mt-[60px]">2026</p>

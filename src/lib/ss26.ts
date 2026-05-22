@@ -16,6 +16,8 @@ export const SS26_FALLBACK_GALLERY = [
   { url: "/nipase-100gbani-2.jpg", altText: "Nipase look three" },
   { url: "/nipase-100gbani-3.jpg", altText: "Nipase look four" },
   { url: "/nipase-dsc09849.jpg", altText: "Nipase look five" },
+  { url: "/nipase-dsc02333.jpg", altText: "Buba Overshirt — front" },
+  { url: "/nipase-dsc02332.jpg", altText: "Buba Overshirt — back" },
 ] as const;
 
 export async function getSS26Product(): Promise<ShopifyProduct | null> {

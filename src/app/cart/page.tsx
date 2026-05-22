@@ -41,7 +41,7 @@ export default function CartPage() {
   return (
     <main className="flex-1 bg-white">
       {/* Page header — item count */}
-      <div className="flex justify-center px-[60px] pt-[120px]">
+      <div className="flex justify-center px-[60px] pt-[80px] md:pt-[120px]">
         <p className="font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light text-[#000002]">
           {itemCount} {itemCount === 1 ? "item" : "items"}
         </p>
