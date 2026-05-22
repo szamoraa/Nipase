@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { resolveGalleryImages } from "@/lib/ss26";
 import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
@@ -31,6 +31,33 @@ export function SS26FigmaShop({ product }: Props) {
   const firstVariant = product?.variants[0] ?? null;
 
   const gallery = resolveGalleryImages(product);
+  const galleryRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const elements = galleryRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const mostVisible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!mostVisible) return;
+        const index = Number(mostVisible.target.getAttribute("data-index"));
+        if (!Number.isNaN(index)) setActiveIndex(index);
+      },
+      { rootMargin: "-60px 0px -45% 0px", threshold: [0.25, 0.5, 0.75, 1] }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [gallery.length]);
+
+  function scrollToImage(index: number) {
+    setActiveIndex(index);
+    galleryRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function handleAddToCart() {
     if (!selectedVariant || !selectedSize || status === "adding") return;
@@ -58,12 +85,20 @@ export function SS26FigmaShop({ product }: Props) {
             : "ADD TO CART";
 
   return (
-    <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[60px] pt-[60px] pb-[60px]">
+    <div className="flex min-h-screen items-start gap-[60px] pl-[238px] pr-[calc(60px+clamp(40px,3.5vw,54px)+30px)] pt-[60px] pb-[60px]">
 
       {/* ── Images column — tall images stacked vertically, capped at Figma size ── */}
       <div className="flex min-w-0 flex-1 flex-col gap-[30px] max-w-[489px]">
-        {gallery.map(({ url, altText }) => (
-          <div key={url} className="relative aspect-[3/4] w-full overflow-hidden">
+        {gallery.map(({ url, altText }, i) => (
+          <div
+            key={`${url}-${i}`}
+            ref={(el) => {
+              galleryRefs.current[i] = el;
+            }}
+            data-index={i}
+            id={`gallery-image-${i}`}
+            className="relative aspect-[3/4] w-full scroll-mt-[60px] overflow-hidden"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
@@ -75,7 +110,7 @@ export function SS26FigmaShop({ product }: Props) {
       </div>
 
       {/* ── Product info column — sticky, 343 px wide ── */}
-      <div className="sticky top-[60px] flex max-h-[calc(100vh-120px)] w-[343px] shrink-0 flex-col gap-[132px] overflow-y-auto overscroll-contain py-[120px]">
+      <div className="sticky top-[60px] flex w-[343px] shrink-0 flex-col gap-[132px] py-[120px]">
 
         {/* Upper block: title → price → description → size → CTA */}
         <div className="flex flex-col gap-[18px]">
@@ -141,18 +176,32 @@ export function SS26FigmaShop({ product }: Props) {
         </div>
       </div>
 
-      {/* ── Right filmstrip — small thumbnails mirror the main column order ── */}
-      {/* Offset matches sunburst height (58px) + gap (201px) + top inset (60px) */}
-      <div className="sticky top-[319px] flex w-[47px] shrink-0 flex-col gap-[16px] self-start">
+      {/* ── Right filmstrip — fixed, directly below the sunburst logo ── */}
+      {/* Sunburst: right-[60px] top-[60px], natural 54×58 SVG rendered at clamp(40px,3.5vw,54px)
+          Bottom of sunburst ≈ top-[60px] + clamp(43px,3.76vw,58px). Add 16px gap. */}
+      <div
+        className="fixed right-[60px] z-40 flex flex-col gap-[16px]"
+        style={{ top: "calc(60px + clamp(43px, 3.76vw, 58px) + 16px)", width: "clamp(40px, 3.5vw, 54px)" }}
+      >
         {gallery.map(({ url, altText }, i) => (
-          <div key={url} className="relative aspect-[3/4] w-full overflow-hidden">
+          <button
+            key={`${url}-${i}`}
+            type="button"
+            onClick={() => scrollToImage(i)}
+            aria-label={`View ${altText ?? `image ${i + 1}`}`}
+            aria-current={activeIndex === i ? "true" : undefined}
+            className={`relative aspect-[3/4] w-full overflow-hidden transition-opacity ${
+              activeIndex === i ? "opacity-100" : "opacity-40 hover:opacity-70"
+            }`}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
-              alt={altText ?? `thumbnail ${i + 1}`}
+              alt=""
+              aria-hidden
               className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
-          </div>
+          </button>
         ))}
       </div>
     </div>
