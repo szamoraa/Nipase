@@ -110,7 +110,7 @@ export function SS26FigmaShop({ product }: Props) {
       </div>
 
       {/* ── Product info column — sticky, 343 px wide ── */}
-      <div className="sticky top-[60px] flex w-[343px] shrink-0 flex-col gap-[132px] py-[120px]">
+      <div className="sticky top-[60px] flex w-[343px] shrink-0 flex-col gap-[132px] py-[220px]">
 
         {/* Upper block: title → price → description → size → CTA */}
         <div className="flex flex-col gap-[18px]">
@@ -177,11 +177,10 @@ export function SS26FigmaShop({ product }: Props) {
       </div>
 
       {/* ── Right filmstrip — fixed, directly below the sunburst logo ── */}
-      {/* Sunburst: right-[60px] top-[60px], natural 54×58 SVG rendered at clamp(40px,3.5vw,54px)
-          Bottom of sunburst ≈ top-[60px] + clamp(43px,3.76vw,58px). Add 16px gap. */}
+      {/* Filmstrip — fixed at the same top as main content columns (280px) */}
       <div
         className="fixed right-[60px] z-40 flex flex-col gap-[16px]"
-        style={{ top: "calc(60px + clamp(43px, 3.76vw, 58px) + 16px)", width: "clamp(40px, 3.5vw, 54px)" }}
+        style={{ top: "280px", width: "clamp(40px, 3.5vw, 54px)" }}
       >
         {gallery.map(({ url, altText }, i) => (
           <button

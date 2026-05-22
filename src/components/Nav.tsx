@@ -22,65 +22,65 @@ export function Nav() {
 
   return (
     <>
-      {/* Left column — fixed top-left on all pages */}
-      <div className="fixed left-[60px] top-[60px] z-50 flex w-[178px] flex-col gap-[96px]">
-        <div className="flex flex-col gap-[60px]">
-          <div className="flex flex-col gap-[60px]">
-            <Link href="/" aria-label="Nipase home" className="block w-[54px] transition-opacity hover:opacity-70">
-              <Image
-                src="/nipase-wordmark.svg"
-                alt="Nipase"
-                width={54}
-                height={16}
-                priority
-                className="h-auto w-[54px]"
-              />
-            </Link>
-            <p className={`w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002] ${isHome ? "" : "invisible"}`}>
-              Centred on the richness of one&rsquo;s being.
-            </p>
-          </div>
-
-          <nav aria-label="Primary" className="flex flex-col items-start gap-[18px]">
-            {NAV_LINKS.map(({ label, href }) => {
-              if (label === "CART") {
-                return (
-                  <Link
-                    key={label}
-                    href={href}
-                    aria-label={
-                      itemCount > 0
-                        ? `Cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`
-                        : "Cart"
-                    }
-                    className="inline-flex items-center gap-[6px] transition-opacity hover:opacity-70"
-                  >
-                    <span className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px]`}>CART</span>
-                    {itemCount > 0 && (
-                      <span
-                        className={`${NAV_PILL} min-w-[28px] px-[10px] py-[5px]`}
-                        aria-hidden
-                      >
-                        {itemCount}
-                      </span>
-                    )}
-                  </Link>
-                );
-              }
-
-              return (
-                <Link
-                  key={label}
-                  href={href}
-                  className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px] transition-opacity hover:opacity-70`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+      {/* Wordmark + tagline — fixed top-left */}
+      <div className="fixed left-[60px] top-[60px] z-50 flex w-[178px] flex-col gap-[60px]">
+        <Link href="/" aria-label="Nipase home" className="block w-[54px] transition-opacity hover:opacity-70">
+          <Image
+            src="/nipase-wordmark.svg"
+            alt="Nipase"
+            width={54}
+            height={16}
+            priority
+            className="h-auto w-[54px]"
+          />
+        </Link>
+        <p className={`w-[178px] font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002] ${isHome ? "" : "invisible"}`}>
+          Centred on the richness of one&rsquo;s being.
+        </p>
       </div>
+
+      {/* Nav pills — fixed at the same top as main content columns (280px) */}
+      <nav
+        aria-label="Primary"
+        className="fixed left-[60px] top-[280px] z-50 flex flex-col items-start gap-[18px]"
+      >
+        {NAV_LINKS.map(({ label, href }) => {
+          if (label === "CART") {
+            return (
+              <Link
+                key={label}
+                href={href}
+                aria-label={
+                  itemCount > 0
+                    ? `Cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`
+                    : "Cart"
+                }
+                className="inline-flex items-center gap-[6px] transition-opacity hover:opacity-70"
+              >
+                <span className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px]`}>CART</span>
+                {itemCount > 0 && (
+                  <span
+                    className={`${NAV_PILL} min-w-[28px] px-[10px] py-[5px]`}
+                    aria-hidden
+                  >
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            );
+          }
+
+          return (
+            <Link
+              key={label}
+              href={href}
+              className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px] transition-opacity hover:opacity-70`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Sunburst — fixed top-right on all pages */}
       <Link
