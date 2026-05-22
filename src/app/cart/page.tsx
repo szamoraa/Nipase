@@ -7,8 +7,8 @@ function formatPrice(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currencyCode,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(parseFloat(amount));
 }
 
@@ -18,86 +18,106 @@ export default function CartPage() {
 
   if (!cart || itemCount === 0) {
     return (
-      <main className="flex-1 bg-white px-[68px] pt-[200px] pb-[60px]">
-        <h1 className="text-xs uppercase tracking-[0.28em] text-[#808080]">Your bag</h1>
-        <p className="mt-16 font-[family-name:var(--font-ojuju)] text-[32px] font-medium text-black">
-          Your bag is empty.
-        </p>
-        <Link
-          href="/shop/ss26"
-          className="mt-8 inline-block font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080] underline underline-offset-4 hover:text-black"
-        >
-          Back to shop
-        </Link>
+      <main className="flex-1 bg-white">
+        <div className="flex min-h-screen flex-col items-center justify-center gap-[18px] px-[60px]">
+          <p className="font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light text-[#5b5b64]">
+            Your bag is empty.
+          </p>
+          <Link
+            href="/shop/ss26"
+            className="inline-flex h-[28px] items-center justify-center rounded-[50px] bg-[#161920] px-[18px] font-[family-name:var(--font-geist-mono)] text-[12px] font-normal text-white transition-opacity hover:opacity-80"
+          >
+            Shop SS26
+          </Link>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="flex-1 bg-white px-[68px] pt-[200px] pb-[60px]">
-      <h1 className="text-xs uppercase tracking-[0.28em] text-[#808080]">Your bag</h1>
+    <main className="flex-1 bg-white">
+      {/* Page header — item count */}
+      <div className="flex justify-center px-[60px] pt-[120px]">
+        <p className="font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light text-[#000002]">
+          {itemCount} {itemCount === 1 ? "item" : "items"}
+        </p>
+      </div>
 
-      <div className="mt-16 flex items-start gap-[60px]">
-        {/* Line items */}
-        <ul className="min-w-0 flex-1 divide-y divide-[#e5e5e5]">
-          {lines.map((line) => (
-            <li key={line.id} className="flex items-start justify-between gap-10 py-8">
-              <div className="flex flex-col gap-[10px]">
-                <p className="font-[family-name:var(--font-ojuju)] text-[18px] font-medium leading-normal text-black">
-                  {line.merchandise.product.title}
-                </p>
-                {line.merchandise.title !== "Default Title" && (
-                  <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
-                    {line.merchandise.title}
-                  </p>
+      {/* Line items — centred column matching Figma width */}
+      <div className="mx-auto mt-[60px] flex w-full max-w-[340px] flex-col gap-[60px] px-0 pb-[120px]">
+        <ul className="flex flex-col gap-[50px]">
+          {lines.map((line) => {
+            const imgUrl =
+              line.merchandise.product.images?.edges?.[0]?.node?.url ?? null;
+
+            return (
+              <li key={line.id} className="flex flex-col gap-[50px]">
+                {/* Product image — 3:4 aspect, full column width */}
+                {imgUrl && (
+                  <div className="relative aspect-[699/932] w-full overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imgUrl}
+                      alt={line.merchandise.product.title}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  </div>
                 )}
-                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
-                  Qty {line.quantity}
-                </p>
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-4">
-                <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-black">
-                  {formatPrice(line.cost.totalAmount.amount, line.cost.totalAmount.currencyCode)}
-                </p>
-                <button
-                  onClick={() => removeFromCart(line.id)}
-                  disabled={loading}
-                  className="font-[family-name:var(--font-geist-mono)] text-[13px] font-light text-[#808080] underline-offset-4 hover:underline disabled:opacity-40"
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          ))}
+
+                {/* Product info */}
+                <div className="flex flex-col gap-[18px]">
+                  {/* Title row + QTY */}
+                  <div className="flex items-center justify-between">
+                    <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-normal text-[#000002]">
+                      {line.merchandise.product.title}
+                    </p>
+                    <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-normal text-[#000002]">
+                      <span className="text-[#5b5b64]">QTY</span>
+                      {` ${line.quantity}`}
+                    </p>
+                  </div>
+
+                  {/* Variant + remove */}
+                  <div className="flex items-center justify-between">
+                    {line.merchandise.title !== "Default Title" && (
+                      <p className="font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#5b5b64]">
+                        {line.merchandise.title}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(line.id)}
+                      disabled={loading}
+                      aria-label={`Remove ${line.merchandise.product.title}`}
+                      className="ml-auto shrink-0 font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-none text-[#000002] transition-opacity hover:opacity-50 disabled:opacity-30"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
-        {/* Summary — sticky */}
-        <div className="sticky top-[132px] flex w-full max-w-[335px] shrink-0 flex-col gap-[40px]">
-          <div className="flex flex-col gap-[20px]">
-            <div className="flex items-center justify-between">
-              <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-[#808080]">
-                Total
-              </p>
-              <p className="font-[family-name:var(--font-geist-mono)] text-[14px] font-light text-black">
-                {formatPrice(cart.cost.totalAmount.amount, cart.cost.totalAmount.currencyCode)}
-              </p>
-            </div>
-            <div className="h-px bg-[#e5e5e5]" />
-          </div>
+        {/* Total + Checkout */}
+        <div className="flex items-center justify-between">
+          <p className="font-[family-name:var(--font-geist-mono)] text-[11.93px] font-light leading-normal text-[#000002]">
+            {"Total  "}
+            <span className="font-normal">
+              {formatPrice(
+                cart.cost.totalAmount.amount,
+                cart.cost.totalAmount.currencyCode
+              )}
+            </span>
+          </p>
 
           <a
             href={checkoutUrl!}
-            className="flex w-full items-center justify-center bg-[#161920] px-[17px] py-[10px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium text-white transition-opacity hover:opacity-90"
+            className="inline-flex h-[28px] items-center justify-center rounded-[50px] bg-[#161920] px-[18px] font-[family-name:var(--font-geist-mono)] text-[12px] font-normal text-white transition-opacity hover:opacity-80"
           >
             Checkout
           </a>
-
-          <Link
-            href="/shop/ss26"
-            className="text-center font-[family-name:var(--font-geist-mono)] text-[13px] font-light text-[#808080] underline-offset-4 hover:underline"
-          >
-            Continue shopping
-          </Link>
         </div>
       </div>
     </main>

@@ -6,7 +6,11 @@ export type CartLine = {
   merchandise: {
     id: string;
     title: string;
-    product: { title: string; handle: string };
+    product: {
+      title: string;
+      handle: string;
+      images: { edges: Array<{ node: { url: string; altText: string | null } }> };
+    };
   };
   cost: { totalAmount: { amount: string; currencyCode: string } };
 };
@@ -35,7 +39,13 @@ const CART_FIELDS = /* GraphQL */ `
           ... on ProductVariant {
             id
             title
-            product { title handle }
+            product {
+              title
+              handle
+              images(first: 1) {
+                edges { node { url altText } }
+              }
+            }
           }
         }
         cost {

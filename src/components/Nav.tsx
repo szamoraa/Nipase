@@ -11,6 +11,9 @@ const NAV_LINKS = [
   { label: "CART", href: "/cart" },
 ] as const;
 
+const NAV_PILL =
+  "inline-flex h-[28px] shrink-0 items-center justify-center whitespace-nowrap rounded-[50px] bg-[#dcdcdc] font-[family-name:var(--font-ojuju)] text-[12px] font-medium leading-none text-[#000002]";
+
 /** Global fixed shell — renders on every page. */
 export function Nav() {
   const { itemCount } = useCart();
@@ -38,16 +41,43 @@ export function Nav() {
             </p>
           </div>
 
-          <nav aria-label="Primary" className="flex w-[64px] flex-col gap-[18px]">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="flex h-[28px] items-center justify-center rounded-[50px] bg-[#dcdcdc] px-[18px] py-[5px] text-[12px] font-medium leading-normal text-[#000002] transition-opacity hover:opacity-70"
-              >
-                {label === "CART" && itemCount > 0 ? `CART (${itemCount})` : label}
-              </Link>
-            ))}
+          <nav aria-label="Primary" className="flex flex-col items-start gap-[18px]">
+            {NAV_LINKS.map(({ label, href }) => {
+              if (label === "CART") {
+                return (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-label={
+                      itemCount > 0
+                        ? `Cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`
+                        : "Cart"
+                    }
+                    className="inline-flex items-center gap-[6px] transition-opacity hover:opacity-70"
+                  >
+                    <span className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px]`}>CART</span>
+                    {itemCount > 0 && (
+                      <span
+                        className={`${NAV_PILL} min-w-[28px] px-[10px] py-[5px]`}
+                        aria-hidden
+                      >
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              }
+
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  className={`${NAV_PILL} min-w-[64px] px-[18px] py-[5px] transition-opacity hover:opacity-70`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
       </div>
