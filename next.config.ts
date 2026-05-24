@@ -1,16 +1,29 @@
 import type { NextConfig } from "next";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-/** Pin Turbopack to this app so `public/` resolves here (avoids wrong root when parent has a lockfile). */
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
+/** Walk up to find the directory that actually contains node_modules/next (supports git worktrees). */
+function findTurbopackRoot(start: string): string {
+  let dir = start;
+  while (true) {
+    if (fs.existsSync(path.join(dir, "node_modules", "next"))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) return start;
+    dir = parent;
+  }
+}
+
+const turbopackRoot = findTurbopackRoot(projectRoot);
 
 const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: "/story", destination: "/about", permanent: true }];
   },
   turbopack: {
-    root: projectRoot,
+    root: turbopackRoot,
   },
   /** Cursor / browser previews often use 127.0.0.1; without this, dev assets (HMR) can be blocked. */
   allowedDevOrigins: ["127.0.0.1"],
