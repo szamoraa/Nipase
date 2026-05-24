@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next";
 
 import { Nav } from "@/components/Nav";
 import { AudioProvider } from "@/context/AudioContext";
@@ -41,6 +42,7 @@ export default function RootLayout({
             {children}
           </AudioProvider>
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );
