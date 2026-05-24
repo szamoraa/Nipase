@@ -24,6 +24,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Nipase",
   description: "SS26 Collection",
+  icons: { icon: "/nipase-sunburst.svg" },
 };
 
 export default function RootLayout({
