@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@shopify/storefront-api-client": "^1.0.10",
+    "@vercel/analytics": "^2.0.1",
     "@vimeo/player": "^2.30.4",
     "next": "16.2.1",
     "react": "19.2.4",
