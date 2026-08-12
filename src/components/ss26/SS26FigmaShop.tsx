@@ -3,16 +3,42 @@
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { resolveGalleryImages } from "@/lib/ss26";
-import { formatShopifyPrice, type ShopifyProduct } from "@/lib/product";
+import { formatShopifyPrice, getOptionValue, type ShopifyProduct } from "@/lib/product";
 
 /**
- * Size labels map positionally to Shopify variant order (index 0–4).
- * Shopify variant titles: "… / Extra Small", "… / Small", etc.
- * Keep this array in the same order as variants are set up in the store.
+ * Shopify `Size` option values in display order, with their short labels.
+ * Variants are matched on these values rather than by position — Shopify does
+ * not guarantee variant ordering, and the RUSTIC BROWN colourway is in fact
+ * stored out of size order.
  */
-const SIZES = ["XS", "S", "M", "L", "XL"] as const;
-type Size = (typeof SIZES)[number];
-const SIZE_INDEX: Record<Size, number> = { XS: 0, S: 1, M: 2, L: 3, XL: 4 };
+const SIZE_ORDER = ["Extra Small", "Small", "Medium", "Large", "Extra Large"] as const;
+const SIZE_LABEL: Record<string, string> = {
+  "Extra Small": "XS",
+  Small: "S",
+  Medium: "M",
+  Large: "L",
+  "Extra Large": "XL",
+};
+
+/**
+ * Swatch colours for the Shopify colour option values. Shopify has no
+ * colour-hex field on options, so these approximations of the garment dye are
+ * maintained here — an unrecognised value still renders, as a neutral chip.
+ */
+const COLOUR_SWATCH: Record<string, string> = {
+  "RUSTIC RED": "#A8412A",
+  "RUSTIC BROWN": "#7C4A33",
+};
+const FALLBACK_SWATCH = "#c4c4c4";
+
+/**
+ * The option is currently named "Color" in Shopify Admin. We accept either
+ * spelling so that renaming it to "Colour" in Admin — to match the copy on
+ * this page — cannot silently break variant matching.
+ */
+function getColour(variant: Parameters<typeof getOptionValue>[0]) {
+  return getOptionValue(variant, "Color") ?? getOptionValue(variant, "Colour");
+}
 
 const SIZE_CHART = [
   { size: "XS", back: "67cm",   arm: "62cm",   chest: "46cm", shoulder: "38cm" },
@@ -25,19 +51,54 @@ const SIZE_CHART = [
 type Props = { product: ShopifyProduct | null };
 
 export function SS26FigmaShop({ product }: Props) {
-  const [selectedSize, setSelectedSize] = useState<Size | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [pickedColour, setPickedColour] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "adding" | "added" | "error">("idle");
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const { addToCart } = useCart();
 
-  // Resolve to the variant that matches the selected size by position.
-  const selectedVariant =
-    product && selectedSize
-      ? (product.variants[SIZE_INDEX[selectedSize]] ?? product.variants[0] ?? null)
-      : (product?.variants[0] ?? null);
+  const variants = product?.variants ?? [];
 
-  // For availability display purposes (price shown before size selection).
-  const firstVariant = product?.variants[0] ?? null;
+  // Colourways in Shopify order, de-duplicated. Empty when Shopify is absent,
+  // which hides the picker rather than showing a single dead swatch.
+  const colours = Array.from(
+    new Set(
+      variants
+        .map(getColour)
+        .filter((colour): colour is string => Boolean(colour))
+    )
+  );
+  const activeColour = pickedColour ?? colours[0] ?? null;
+
+  // Only offer sizes the store actually carries; fall back to the full run so
+  // the layout still reads correctly before Shopify data arrives.
+  const sizes = product
+    ? SIZE_ORDER.filter((size) =>
+        variants.some((variant) => getOptionValue(variant, "Size") === size)
+      )
+    : [...SIZE_ORDER];
+
+  function findVariant(colour: string | null, size: string | null) {
+    if (!size) return null;
+    return (
+      variants.find(
+        (variant) =>
+          getOptionValue(variant, "Size") === size &&
+          (colour === null || getColour(variant) === colour)
+      ) ?? null
+    );
+  }
+
+  const selectedVariant = findVariant(activeColour, selectedSize);
+  const isSoldOut = Boolean(selectedVariant && !selectedVariant.availableForSale);
+
+  // Price is shown before a size is picked, so fall back to the colourway's
+  // first variant. Every variant is currently the same price regardless.
+  const priceVariant =
+    selectedVariant ??
+    variants.find((variant) => getColour(variant) === activeColour) ??
+    variants[0] ??
+    null;
 
   const gallery = resolveGalleryImages(product);
   const galleryRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -69,7 +130,7 @@ export function SS26FigmaShop({ product }: Props) {
   }
 
   async function handleAddToCart() {
-    if (!selectedVariant || !selectedSize || status === "adding") return;
+    if (!selectedVariant || isSoldOut || status === "adding") return;
     setStatus("adding");
     try {
       await addToCart(selectedVariant.id);
@@ -91,7 +152,9 @@ export function SS26FigmaShop({ product }: Props) {
           ? "TRY AGAIN"
           : !selectedSize
             ? "SELECT A SIZE"
-            : "ADD TO CART";
+            : isSoldOut
+              ? "SOLD OUT"
+              : "ADD TO CART";
 
   return (
     /*
@@ -136,9 +199,9 @@ export function SS26FigmaShop({ product }: Props) {
           <div className="flex flex-col gap-[41px]">
             {/* Price + description */}
             <div className="flex flex-col gap-[40px] md:gap-[60px]">
-              {firstVariant && (
+              {priceVariant && (
                 <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light leading-normal text-black">
-                  {formatShopifyPrice(firstVariant.price.amount, firstVariant.price.currencyCode)}
+                  {formatShopifyPrice(priceVariant.price.amount, priceVariant.price.currencyCode)}
                 </p>
               )}
               <p className="font-[family-name:var(--font-geist-mono)] w-full whitespace-pre-wrap text-[12px] font-normal leading-normal text-[#1a1d24] md:w-[305px]">
@@ -146,26 +209,63 @@ export function SS26FigmaShop({ product }: Props) {
               </p>
             </div>
 
+            {/* COLOUR — hidden unless the store carries more than one colourway */}
+            {colours.length > 1 && (
+              <div className="flex flex-col gap-[20px] leading-normal">
+                <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light text-[#808080]">
+                  COLOUR
+                </p>
+                <div className="flex items-center gap-[14px]">
+                  {colours.map((colour) => (
+                    <button
+                      key={colour}
+                      type="button"
+                      onClick={() => setPickedColour(colour)}
+                      aria-label={colour}
+                      aria-pressed={activeColour === colour}
+                      title={colour}
+                      style={{ backgroundColor: COLOUR_SWATCH[colour] ?? FALLBACK_SWATCH }}
+                      className={`h-[18px] w-[18px] shrink-0 rounded-full transition-opacity ${
+                        activeColour === colour
+                          ? "ring-1 ring-black/70 ring-offset-2 ring-offset-white"
+                          : "opacity-60 hover:opacity-100"
+                      }`}
+                    />
+                  ))}
+                  <span className="font-[family-name:var(--font-geist-mono)] text-[11px] font-light text-[#808080]">
+                    {activeColour}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* SIZE */}
             <div className="flex flex-col gap-[20px] leading-normal">
               <p className="font-[family-name:var(--font-geist-mono)] text-[12px] font-light text-[#808080]">
                 SIZE
               </p>
               <div className="flex items-center gap-[20px] whitespace-nowrap not-italic text-[16px] text-black md:gap-[35px]">
-                {SIZES.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`font-[family-name:var(--font-ojuju)] shrink-0 transition-opacity ${
-                      selectedSize === size
-                        ? "font-semibold underline underline-offset-4"
-                        : "font-medium opacity-40 hover:opacity-100"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {sizes.map((size) => {
+                  // With no Shopify data there is nothing to mark unavailable.
+                  const available = !product || Boolean(findVariant(activeColour, size)?.availableForSale);
+                  const state = !available
+                    ? "font-medium cursor-not-allowed line-through opacity-25"
+                    : selectedSize === size
+                      ? "font-semibold underline underline-offset-4"
+                      : "font-medium opacity-40 hover:opacity-100";
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedSize(size)}
+                      disabled={!available}
+                      aria-pressed={selectedSize === size}
+                      className={`font-[family-name:var(--font-ojuju)] shrink-0 transition-opacity ${state}`}
+                    >
+                      {SIZE_LABEL[size] ?? size}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -173,7 +273,7 @@ export function SS26FigmaShop({ product }: Props) {
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={!firstVariant || !selectedSize || status === "adding"}
+              disabled={!selectedVariant || isSoldOut || status === "adding"}
               className={`self-start inline-flex items-center justify-center overflow-hidden rounded-[60px] px-[17px] py-[5px] font-[family-name:var(--font-ojuju)] text-[16px] font-medium not-italic whitespace-nowrap leading-normal text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${status === "error" ? "bg-red-700" : "bg-[#161920]"}`}
             >
               {ctaLabel}
