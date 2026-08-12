@@ -1,8 +1,12 @@
 import { getShopifyClient } from "./shopify";
 
+export type ShopifySelectedOption = { name: string; value: string };
+
 export type ShopifyVariant = {
   id: string;
   title: string;
+  availableForSale: boolean;
+  selectedOptions: ShopifySelectedOption[];
   price: { amount: string; currencyCode: string };
 };
 
@@ -21,60 +25,56 @@ export type ShopifyProduct = {
   images: ShopifyImage[];
 };
 
-const GET_PRODUCT_BY_HANDLE = /* GraphQL */ `
-  query getProductByHandle($handle: String!) {
-    product(handle: $handle) {
-      id
-      title
-      description
-      images(first: 20) {
-        edges {
-          node {
-            url
-            altText
-            width
-            height
-          }
+/**
+ * Shared selection set for both lookups.
+ *
+ * `variants` must stay comfortably above the real variant count — the Buba
+ * Overshirt alone is 2 colours × 5 sizes = 10, so a limit of 10 would silently
+ * truncate the moment a colourway or size is added in Admin.
+ */
+const PRODUCT_FIELDS = /* GraphQL */ `
+  fragment ProductFields on Product {
+    id
+    title
+    description
+    images(first: 20) {
+      edges {
+        node {
+          url
+          altText
+          width
+          height
         }
       }
-      variants(first: 10) {
-        edges {
-          node {
-            id
-            title
-            price { amount currencyCode }
-          }
+    }
+    variants(first: 50) {
+      edges {
+        node {
+          id
+          title
+          availableForSale
+          selectedOptions { name value }
+          price { amount currencyCode }
         }
       }
     }
   }
 `;
 
+const GET_PRODUCT_BY_HANDLE = /* GraphQL */ `
+  ${PRODUCT_FIELDS}
+  query getProductByHandle($handle: String!) {
+    product(handle: $handle) {
+      ...ProductFields
+    }
+  }
+`;
+
 const GET_PRODUCT = /* GraphQL */ `
+  ${PRODUCT_FIELDS}
   query getProduct($id: ID!) {
     product(id: $id) {
-      id
-      title
-      description
-      images(first: 20) {
-        edges {
-          node {
-            url
-            altText
-            width
-            height
-          }
-        }
-      }
-      variants(first: 10) {
-        edges {
-          node {
-            id
-            title
-            price { amount currencyCode }
-          }
-        }
-      }
+      ...ProductFields
     }
   }
 `;
@@ -127,6 +127,17 @@ export async function getShopifyProduct(id: string): Promise<ShopifyProduct | nu
     console.error("[shopify] getShopifyProduct failed:", error);
     return null;
   }
+}
+
+/** Read one of a variant's Shopify option values (e.g. "Color", "Size"). */
+export function getOptionValue(
+  variant: ShopifyVariant,
+  optionName: string
+): string | null {
+  const match = variant.selectedOptions.find(
+    (option) => option.name.toLowerCase() === optionName.toLowerCase()
+  );
+  return match?.value ?? null;
 }
 
 export function formatShopifyPrice(amount: string, currencyCode: string): string {
